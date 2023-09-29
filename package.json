@@ -1,5 +1,5 @@
 {
-  "name": "@reynandaptr/express-prisma",
+  "name": "@reynandaptr/aha-core",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
     "build": "npx tsc",
     "start": "node dist/index.js",
     "test": "jest --detectOpenHandles",
-    "postinstall": "prisma generate --schema node_modules/@reynandaptr/express-prisma-types/prisma/schema.prisma",
+    "postinstall": "prisma generate --schema node_modules/@reynandaptr/aha-types/prisma/schema.prisma",
     "prepare": "husky install"
   },
   "keywords": [],
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@prisma/client": "4.13.0",
-    "@reynandaptr/express-prisma-types": "0.0.0",
+    "@reynandaptr/aha-types": "0.0.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

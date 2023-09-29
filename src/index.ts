@@ -1,4 +1,4 @@
-import {prisma} from '@reynandaptr/express-prisma-types/dist';
+import {prisma} from '@reynandaptr/aha-types/dist';
 import listEndpoints from 'express-list-endpoints';
 
 import app from './app';
