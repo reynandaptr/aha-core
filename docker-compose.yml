@@ -16,10 +16,10 @@ services:
   #   volumes:
   #     - /Users/reynandaptr/Development/docker/postgresql:/var/lib/postgresql/data
   migration:
-    image: ghcr.io/reynandaptr/express-prisma-migration:latest
+    image: ghcr.io/reynandaptr/aha-migration:latest
     pull_policy: always
     environment:
-      - DATABASE_URL=postgresql://postgres:password@postgresql:5432/express_prisma_test?schema=public
+      - DATABASE_URL=postgresql://postgres:password@postgresql:5432/aha?schema=public
 
       - WAIT_HOSTS=postgresql:5432
       - WAIT_SLEEP_INTERVAL=5
