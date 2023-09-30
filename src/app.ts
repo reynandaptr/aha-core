@@ -23,8 +23,8 @@ import {handleResponseError, handleResponseSuccess} from './utils/response'; ;
 const app = express();
 
 const {
-  value: appURL,
-} = getEnvvarValue('APP_URL', true, (error) => {
+  value: cookieDomain,
+} = getEnvvarValue('COOKIE_DOMAIN', true, (error) => {
   if (error) {
     throw new Error(error);
   }
@@ -61,7 +61,7 @@ app.use(bodyParser.urlencoded({
   limit: '1mb',
 }));
 app.use(cors({
-  origin: appURL,
+  origin: `https://*${cookieDomain}`,
   credentials: true,
 }));
 app.use(cookieParser());
