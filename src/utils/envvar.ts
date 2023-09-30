@@ -9,6 +9,7 @@ type EnvvarType = 'PORT' |
   'GOOGLE_CALLBACK_URL' |
   'SENDGRID_API_KEY' |
   'SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID' |
+  'DOCS_URL' |
   'APP_URL';
 
 type EnvvarResult = {
