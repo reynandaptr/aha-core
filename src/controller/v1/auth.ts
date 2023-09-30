@@ -1,6 +1,6 @@
 import {faker} from '@faker-js/faker';
 import {prisma} from '@reynandaptr/aha-types/dist';
-import {EmailVerificationRequestSchema, LoginRequestSchema, Oauth2RedirectRequest, ResetPasswordRequestSchema, SignUpRequestSchema} from '@reynandaptr/aha-types/dist/types';
+import {EmailVerificationRequestSchema, LoginRequestSchema, Oauth2RedirectRequest, ResetPasswordRequestSchema, SignUpRequestSchema, ValidateUserResponse} from '@reynandaptr/aha-types/dist/types';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import {Request, Response} from 'express';
@@ -38,13 +38,23 @@ export const SignUp = async (req: Request, res: Response) => {
 export const ValidateToken = async (req: Request, res: Response) => {
   try {
     if (!req.user) return handleResponseError(res, null, null, true);
-    await prisma.session.create({
+    const session = await prisma.session.create({
       data: {
         type: 'ONLINE',
         user_id: req.user.id,
       },
+      include: {
+        user: true,
+      },
     });
-    return handleResponseSuccess(res, httpStatus.OK);
+    const responseBody: ValidateUserResponse ={
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      is_verified: session.user.is_verified,
+      provider: session.user.provider,
+    };
+    return handleResponseSuccess(res, httpStatus.OK, responseBody);
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }

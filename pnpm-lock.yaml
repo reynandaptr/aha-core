@@ -5,8 +5,8 @@ dependencies:
     specifier: 4.13.0
     version: 4.13.0(prisma@4.13.0)
   '@reynandaptr/aha-types':
-    specifier: 0.8.0
-    version: 0.8.0(prisma@4.13.0)
+    specifier: 0.9.0
+    version: 0.9.0(prisma@4.13.0)
   '@sendgrid/mail':
     specifier: ^7.7.0
     version: 7.7.0
@@ -1939,8 +1939,8 @@ packages:
     resolution: {integrity: sha512-kEYSUa3XT1Oiu/MbdUkyjfVtAOQmZz69KGKFH/GWoQNLvkscrqy4J4XewEY80BrVuyC3vbV7un4kea0xklWhpA==}
     dev: true
 
-  /@reynandaptr/aha-types@0.8.0(prisma@4.13.0):
-    resolution: {integrity: sha512-kBzR2WBZzqaNEft3L++EocoLYy8z3ZS1Eq1vQ4yIvOJw/RMRBiwn2kyJfGHmjJp/jzB7t0MMFL1kZBX8yB+3JQ==, tarball: https://npm.pkg.github.com/download/@reynandaptr/aha-types/0.8.0/ff94526a3d9146190a32691f4539e1fe4caa0c05}
+  /@reynandaptr/aha-types@0.9.0(prisma@4.13.0):
+    resolution: {integrity: sha512-N+ZrQpu2IYYGF47ryjVVqklTi/PTdqMC272gf/6eK4ewbgTYdMNY0XsoctsMPK1GH/AHp/I1ZyPpH6S0qZIlEw==, tarball: https://npm.pkg.github.com/download/@reynandaptr/aha-types/0.9.0/fed9d6d5797167b2f1c196bf5662a728a08c4090}
     requiresBuild: true
     dependencies:
       '@prisma/client': 4.13.0(prisma@4.13.0)
