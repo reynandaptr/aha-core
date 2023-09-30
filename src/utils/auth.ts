@@ -43,7 +43,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
             throw new Error(error);
           }
         });
-        return res.redirect(`${appURL}/app`);
+        return res.redirect(`${appURL}`);
       });
     } else {
       user = await prisma.user.update({
@@ -64,7 +64,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
           throw new Error(error);
         }
       });
-      return res.redirect(`${appURL}/app`);
+      return res.redirect(`${appURL}`);
     }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -93,13 +93,13 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
               password,
             },
           });
-          await setCookie(res, user);
           await prisma.session.create({
             data: {
               type: 'SIGN_UP',
               user_id: user.id,
             },
           });
+          await setCookie(res, user);
           await sendEmailVerification(user);
           const {
             value: appURL,
@@ -108,7 +108,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
               throw new Error(error);
             }
           });
-          return res.redirect(`${appURL}/app`);
+          return res.redirect(`${appURL}`);
         } catch (error) {
           return handleResponseError(res, error, null, true);
         }
