@@ -43,7 +43,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
             throw new Error(error);
           }
         });
-        return res.redirect(`${appURL}`);
+        return res.redirect(`${appURL}/app`);
       });
     } else {
       user = await prisma.user.update({
@@ -64,7 +64,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
           throw new Error(error);
         }
       });
-      return res.redirect(`${appURL}`);
+      return res.redirect(`${appURL}/app`);
     }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -108,7 +108,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
               throw new Error(error);
             }
           });
-          return res.redirect(`${appURL}`);
+          return res.redirect(`${appURL}/app`);
         } catch (error) {
           return handleResponseError(res, error, null, true);
         }
@@ -206,7 +206,7 @@ export const sendEmailVerification = async (user: User): Promise<Session | undef
       templateId: sendgridEmailVerificationTemplateID,
       dynamicTemplateData: {
         email: user.email,
-        link: `${appURL}/email-verification?session_id=${session.id}&session_token=${session.token}`,
+        link: `${appURL}/app/email-verification?session_id=${session.id}&session_token=${session.token}`,
       },
     });
   }

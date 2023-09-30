@@ -162,7 +162,7 @@ describe('GET /', () => {
         .then((response) => {
           expect(response.status).toBe(httpStatus.FOUND);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(appURL);
+          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
@@ -202,7 +202,7 @@ describe('GET /', () => {
           jwt = response.get('Set-Cookie')[0].split('=')[1];
           expect(response.status).toBe(httpStatus.FOUND);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(appURL);
+          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
@@ -341,7 +341,7 @@ describe('GET /', () => {
           jwt = response.get('Set-Cookie')[0].split('=')[1];
           expect(response.status).toBe(httpStatus.FOUND);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(appURL);
+          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
@@ -373,7 +373,7 @@ describe('GET /', () => {
         .then((response) => {
           expect(response.status).toBe(httpStatus.FOUND);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(appURL);
+          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
@@ -386,7 +386,7 @@ describe('GET /', () => {
         .then((response) => {
           expect(response.status).toBe(httpStatus.FOUND);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(appURL);
+          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
