@@ -35,12 +35,10 @@ const isPrismaError = (error: unknown): boolean => {
   error instanceof Prisma.PrismaClientValidationError;
 };
 
-export const handleResponseError = (res: Response, error: unknown, message: string | null, unauthorized: boolean, is404?: boolean) => {
-  if (is404) {
-    return responseError(res, httpStatus.NOT_FOUND, message ? message : httpStatus[httpStatus.NOT_FOUND], error);
-  }
+export const handleResponseError = (res: Response, error: unknown, message: string | null, unauthorized: boolean) => {
   if (error && isBadRequest(error)) {
-    return responseError(res, httpStatus.BAD_REQUEST, message ? message : httpStatus[httpStatus.BAD_REQUEST], error);
+    const err = error as ZodError;
+    return responseError(res, httpStatus.BAD_REQUEST, message ? message : err.errors[0].message, error);
   }
   if (error && isPrismaError(error)) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === prismaNotFoundErrorCode) {

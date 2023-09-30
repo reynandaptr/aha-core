@@ -5,7 +5,7 @@ BigInt.prototype.toJSON = function() {
   const int = Number.parseInt(this.toString());
   return int ?? this.toString();
 };
-/* c8 ignore end */
+/* c8 ignore stop */
 import 'dotenv/config';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -30,17 +30,29 @@ const {
   }
 });
 
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    return handleResponseError(res, httpStatus.TOO_MANY_REQUESTS, httpStatus[httpStatus.TOO_MANY_REQUESTS], false);
-  },
+const {
+  value: environment,
+} = getEnvvarValue('ENVIRONMENT', true, (error) => {
+  if (error) {
+    throw new Error(error);
+  }
 });
 
-app.use(limiter);
+/* c8 ignore start */
+if (environment === 'production') {
+  const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+      return handleResponseError(res, httpStatus.TOO_MANY_REQUESTS, httpStatus[httpStatus.TOO_MANY_REQUESTS], false);
+    },
+  });
+  app.use(limiter);
+}
+/* c8 ignore stop */
+
 app.use(bodyParser.json({
   limit: '1mb',
 }));
