@@ -476,4 +476,20 @@ describe('GET /', () => {
   test('generate user\'s session', async () => {
     await generateUserSession();
   });
+
+  test('test analytics user list', () => {
+    return request(app)
+        .get('/v1/analytics/users')
+        .then((response) => {
+          expect(response.status).toBe(httpStatus.OK);
+        });
+  });
+
+  test('test analytics user online', () => {
+    return request(app)
+        .get('/v1/analytics/users/online')
+        .then((response) => {
+          expect(response.status).toBe(httpStatus.OK);
+        });
+  });
 });
