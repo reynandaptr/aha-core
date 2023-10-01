@@ -129,7 +129,7 @@ const handleLoginError = (res: Response, error: any, message: string | null, una
       if (message) {
         errorMessage = message;
       }
-      res.redirect(`${appURL}/app/sign-in?message=${errorMessage}`);
+      res.redirect(`${appURL}/app/sign-in?error=${errorMessage}`);
       break;
     default:
       handleResponseError(res, error, message, unauthorized);
