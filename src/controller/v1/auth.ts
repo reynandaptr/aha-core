@@ -172,6 +172,9 @@ export const LogOut = async (req: Request, res: Response) => {
       domain: cookieDomain,
     });
 
+    if (req.headers.accept === 'application/json') {
+      return handleResponseSuccess(res, httpStatus.OK);
+    }
     const {
       value: appURL,
     } = getEnvvarValue('APP_URL', true, (error) => {
