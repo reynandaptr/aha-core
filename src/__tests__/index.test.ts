@@ -348,11 +348,11 @@ describe('GET /', () => {
   test('test logout OK', () => {
     return request(app)
         .post('/v1/auth/logout')
+        .set('Accept', 'application/json')
         .set('Cookie', [`aha_jwt=${jwt}`])
         .then((response) => {
-          expect(response.status).toBe(httpStatus.FOUND);
+          expect(response.status).toBe(httpStatus.OK);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(`${appURL}`);
         });
   });
 
