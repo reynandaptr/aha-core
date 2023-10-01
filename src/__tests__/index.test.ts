@@ -159,10 +159,10 @@ describe('GET /', () => {
     return request(app)
         .post('/v1/auth/sign-up')
         .send(user1)
+        .set('Accept', 'application/json')
         .then((response) => {
-          expect(response.status).toBe(httpStatus.FOUND);
+          expect(response.status).toBe(httpStatus.OK);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
@@ -198,11 +198,11 @@ describe('GET /', () => {
           email: user1.email,
           password: user1.password,
         })
+        .set('Accept', 'application/json')
         .then((response) => {
           jwt = response.get('Set-Cookie')[0].split('=')[1];
-          expect(response.status).toBe(httpStatus.FOUND);
+          expect(response.status).toBe(httpStatus.OK);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 
@@ -337,11 +337,11 @@ describe('GET /', () => {
           email: user1.email,
           password: `${user1Password}a`,
         })
+        .set('Accept', 'application/json')
         .then((response) => {
           jwt = response.get('Set-Cookie')[0].split('=')[1];
-          expect(response.status).toBe(httpStatus.FOUND);
+          expect(response.status).toBe(httpStatus.OK);
           expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(`${appURL}/app`);
         });
   });
 

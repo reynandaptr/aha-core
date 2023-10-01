@@ -2,15 +2,16 @@ import {LoginProvider, Prisma, Session, User} from '@prisma/client';
 import {prisma} from '@reynandaptr/aha-types/dist';
 import sendbirdMail from '@sendgrid/mail';
 import bcrypt from 'bcryptjs';
-import {Response} from 'express';
+import {Request, Response} from 'express';
+import httpStatus from 'http-status';
 import moment from 'moment';
 
 import {getEnvvarValue} from './envvar';
 import {generateJWT} from './jwt';
-import {handleResponseError} from './response';
+import {handleResponseError, handleResponseSuccess} from './response';
 import {prismaNotFoundErrorCode} from '../constants';
 
-export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response, loginProvider: LoginProvider, providerID: string, name: string, email: string, password?: string, accessToken?: string, refreshToken?: string, expiredAt?: number) => {
+export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, res: Response, loginProvider: LoginProvider, providerID: string, name: string, email: string, password?: string, accessToken?: string, refreshToken?: string, expiredAt?: number) => {
   try {
     let user = await prisma.user.findFirstOrThrow({
       where: {
@@ -36,6 +37,9 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
         if (error) return handleResponseError(res, error, null, true);
         if (!match) return handleResponseError(res, error, 'Password is wrong', true);
         await setCookie(res, user);
+        if (req.headers.accept === 'application/json') {
+          return handleResponseSuccess(res, httpStatus.OK);
+        }
         const {
           value: appURL,
         } = getEnvvarValue('APP_URL', true, (error) => {
@@ -57,6 +61,9 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
         },
       });
       await setCookie(res, user);
+      if (req.headers.accept === 'application/json') {
+        return handleResponseSuccess(res, httpStatus.OK);
+      }
       const {
         value: appURL,
       } = getEnvvarValue('APP_URL', true, (error) => {
@@ -101,6 +108,9 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', res: Response,
           });
           await setCookie(res, user);
           await sendEmailVerification(user);
+          if (req.headers.accept === 'application/json') {
+            return handleResponseSuccess(res, httpStatus.OK);
+          }
           const {
             value: appURL,
           } = getEnvvarValue('APP_URL', true, (error) => {

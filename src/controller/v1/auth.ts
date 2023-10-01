@@ -17,7 +17,7 @@ import {validateRequest} from '../../utils/zod';
 export const Login = async (req: Request, res: Response) => {
   try {
     const {body} = await validateRequest(LoginRequestSchema, req);
-    return createOrGetUser('login', res, 'USER_DEFINED_PASSWORD', body.email, '', body.email, body.password);
+    return createOrGetUser('login', req, res, 'USER_DEFINED_PASSWORD', body.email, '', body.email, body.password);
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }
@@ -28,7 +28,7 @@ export const SignUp = async (req: Request, res: Response) => {
     const {body} = await validateRequest(SignUpRequestSchema, req);
     bcrypt.hash(body.password, 10, async (error, hash) => {
       if (error) return handleResponseError(res, error, null, false);
-      return createOrGetUser('sign-up', res, 'USER_DEFINED_PASSWORD', body.email, '', body.email, hash);
+      return createOrGetUser('sign-up', req, res, 'USER_DEFINED_PASSWORD', body.email, '', body.email, hash);
     });
   } catch (error) {
     return handleResponseError(res, error, null, false);
@@ -188,7 +188,7 @@ export const LogOut = async (req: Request, res: Response) => {
 export const TestLoginGoogle = async (req: Request, res: Response) => {
   try {
     const email = req.body.email as string;
-    return createOrGetUser('sign-up', res, 'GOOGLE', faker.datatype.uuid(), '', email);
+    return createOrGetUser('sign-up', req, res, 'GOOGLE', faker.datatype.uuid(), '', email);
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }
@@ -241,7 +241,7 @@ export const Oauth2RedirectGoogle = async (req: Request, res: Response) => {
     if (!jwtPayload || typeof jwtPayload === 'string' || !jwtPayload.sub) {
       return handleResponseError(res, null, null, true);
     }
-    return createOrGetUser('sign-up', res, 'GOOGLE', jwtPayload.sub, jwtPayload.name, jwtPayload.email, '', response.data.access_token, response.data.refresh_token, jwtPayload.exp);
+    return createOrGetUser('sign-up', req, res, 'GOOGLE', jwtPayload.sub, jwtPayload.name, jwtPayload.email, '', response.data.access_token, response.data.refresh_token, jwtPayload.exp);
   } catch (error) {
     return handleResponseError(res, error, null, true);
   }
