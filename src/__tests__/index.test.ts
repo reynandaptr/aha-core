@@ -397,9 +397,8 @@ describe('GET /', () => {
           email: user1.email,
         })
         .then((response) => {
-          const responseBody: BaseResponse = response.body;
-          expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-          expect(responseBody.message).toBe('Email already connected with USER_DEFINED_PASSWORD');
+          expect(response.status).toBe(httpStatus.FOUND);
+          expect(response.get('location')).toContain(encodeURI('Email already connected with USER_DEFINED_PASSWORD'));
         });
   });
 

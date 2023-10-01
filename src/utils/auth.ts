@@ -8,7 +8,7 @@ import moment from 'moment';
 
 import {getEnvvarValue} from './envvar';
 import {generateJWT} from './jwt';
-import {handleResponseError, handleResponseSuccess} from './response';
+import {getErrorMessage, handleResponseError, handleResponseSuccess} from './response';
 import {prismaNotFoundErrorCode} from '../constants';
 
 export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, res: Response, loginProvider: LoginProvider, providerID: string, name: string, email: string, password?: string, accessToken?: string, refreshToken?: string, expiredAt?: number) => {
@@ -27,27 +27,17 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
       },
     });
     if (user.provider !== loginProvider) {
-      return handleResponseError(res, null, `Email already connected with ${user.provider}`, true);
+      return handleLoginError(res, null, `Email already connected with ${user.provider}`, true, loginProvider);
     }
     if (user.provider == 'USER_DEFINED_PASSWORD' && usage === 'sign-up') {
-      return handleResponseError(res, null, 'Email already registered', true);
+      return handleLoginError(res, null, 'Email already registered', true, loginProvider);
     }
     if (usage === 'login') {
       bcrypt.compare(password || '', user.password || '', async (error, match) => {
-        if (error) return handleResponseError(res, error, null, true);
-        if (!match) return handleResponseError(res, error, 'Password is wrong', true);
-        await setCookie(res, user);
-        if (req.headers.accept === 'application/json') {
-          return handleResponseSuccess(res, httpStatus.OK);
-        }
-        const {
-          value: appURL,
-        } = getEnvvarValue('APP_URL', true, (error) => {
-          if (error) {
-            throw new Error(error);
-          }
-        });
-        return res.redirect(`${appURL}/app`);
+        if (error) return handleLoginError(res, error, null, true, loginProvider);
+        if (!match) return handleLoginError(res, error, 'Password is wrong', true, loginProvider);
+        await setCookie(res, user, loginProvider);
+        return handleLoginSuccess(req, res);
       });
     } else {
       user = await prisma.user.update({
@@ -60,18 +50,8 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
           expired_at: expiredAt,
         },
       });
-      await setCookie(res, user);
-      if (req.headers.accept === 'application/json') {
-        return handleResponseSuccess(res, httpStatus.OK);
-      }
-      const {
-        value: appURL,
-      } = getEnvvarValue('APP_URL', true, (error) => {
-        if (error) {
-          throw new Error(error);
-        }
-      });
-      return res.redirect(`${appURL}/app`);
+      await setCookie(res, user, loginProvider);
+      return handleLoginSuccess(req, res);
     }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -84,7 +64,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
               },
             });
             if (existingUser && existingUser.provider !== loginProvider) {
-              return handleResponseError(res, null, `Email already connected with ${existingUser.provider}`, true);
+              return handleLoginError(res, null, `Email already connected with ${existingUser.provider}`, true, loginProvider);
             }
           }
           const user = await prisma.user.create({
@@ -106,32 +86,58 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
               user_id: user.id,
             },
           });
-          await setCookie(res, user);
+          await setCookie(res, user, loginProvider);
           await sendEmailVerification(user);
-          if (req.headers.accept === 'application/json') {
-            return handleResponseSuccess(res, httpStatus.OK);
-          }
-          const {
-            value: appURL,
-          } = getEnvvarValue('APP_URL', true, (error) => {
-            if (error) {
-              throw new Error(error);
-            }
-          });
-          return res.redirect(`${appURL}/app`);
+          return handleLoginSuccess(req, res);
         } catch (error) {
-          return handleResponseError(res, error, null, true);
+          return handleLoginError(res, error, null, true, loginProvider);
         }
       } else {
-        return handleResponseError(res, error, null, false);
+        return handleLoginError(res, error, null, false, loginProvider);
       }
     } else {
-      return handleResponseError(res, error, null, false);
+      return handleLoginError(res, error, null, false, loginProvider);
     }
   }
 };
 
-export const setCookie = async (res: Response, user: User) => {
+const handleLoginSuccess = (req: Request, res: Response) => {
+  if (req.headers.accept === 'application/json') {
+    return handleResponseSuccess(res, httpStatus.OK);
+  }
+  const {
+    value: appURL,
+  } = getEnvvarValue('APP_URL', true, (error) => {
+    if (error) {
+      throw new Error(error);
+    }
+  });
+  return res.redirect(`${appURL}/app`);
+};
+
+const handleLoginError = (res: Response, error: any, message: string | null, unauthorized: boolean, loginProvider: LoginProvider) => {
+  const {
+    value: appURL,
+  } = getEnvvarValue('APP_URL', true, (error) => {
+    if (error) {
+      throw new Error(error);
+    }
+  });
+  switch (loginProvider) {
+    case 'GOOGLE':
+      let errorMessage: string = getErrorMessage(error);
+      if (message) {
+        errorMessage = message;
+      }
+      res.redirect(`${appURL}/app/sign-in?message=${errorMessage}`);
+      break;
+    default:
+      handleResponseError(res, error, message, unauthorized);
+      break;
+  }
+};
+
+export const setCookie = async (res: Response, user: User, loginProvider: LoginProvider) => {
   await prisma.session.create({
     data: {
       type: 'LOGIN',
@@ -142,7 +148,7 @@ export const setCookie = async (res: Response, user: User) => {
     value: cookieDomain,
   } = getEnvvarValue('COOKIE_DOMAIN', true, (error) => {
     if (error) {
-      return handleResponseError(res, error, null, false);
+      return handleLoginError(res, error, null, false, loginProvider);
     }
   });
   const jwt = await generateJWT({

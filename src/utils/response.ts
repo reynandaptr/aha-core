@@ -35,6 +35,20 @@ const isPrismaError = (error: unknown): boolean => {
   error instanceof Prisma.PrismaClientValidationError;
 };
 
+export const getErrorMessage = (error: any): string => {
+  if (isBadRequest(error)) {
+    const err = error as ZodError;
+    return err.errors[0].message;
+  }
+  if (isPrismaError(error)) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === prismaNotFoundErrorCode) {
+      return httpStatus[httpStatus.NOT_FOUND];
+    }
+    return httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
+  }
+  return httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
+};
+
 export const handleResponseError = (res: Response, error: unknown, message: string | null, unauthorized: boolean) => {
   if (error && isBadRequest(error)) {
     const err = error as ZodError;
@@ -49,5 +63,5 @@ export const handleResponseError = (res: Response, error: unknown, message: stri
   if (unauthorized) {
     return responseError(res, httpStatus.UNAUTHORIZED, message ? message : httpStatus[httpStatus.UNAUTHORIZED], error);
   }
-  responseError(res, httpStatus.INTERNAL_SERVER_ERROR, message ? message : httpStatus[httpStatus.INTERNAL_SERVER_ERROR], error);
+  return responseError(res, httpStatus.INTERNAL_SERVER_ERROR, message ? message : httpStatus[httpStatus.INTERNAL_SERVER_ERROR], error);
 };
