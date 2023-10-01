@@ -90,7 +90,7 @@ export const EmailVerification = async (req: Request, res: Response) => {
       },
     });
     if (!req.user) {
-      await setCookie(res, user);
+      await setCookie(res, user, user.provider);
     }
     const {
       value: appURL,
