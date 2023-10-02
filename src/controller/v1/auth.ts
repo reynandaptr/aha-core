@@ -92,14 +92,7 @@ export const EmailVerification = async (req: Request, res: Response) => {
     if (!req.user) {
       await setCookie(res, user, user.provider);
     }
-    const {
-      value: appURL,
-    } = getEnvvarValue('APP_URL', true, (error) => {
-      if (error) {
-        throw new Error(error);
-      }
-    });
-    return res.redirect(`${appURL}/login`);
+    return handleResponseSuccess(res, httpStatus.OK);
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }
