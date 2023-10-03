@@ -470,26 +470,6 @@ describe('GET /', () => {
         });
   });
 
-  test('generate user\'s session', async () => {
-    await generateUserSession();
-  });
-
-  test('test analytics user list', () => {
-    return request(app)
-        .get('/v1/analytics/users')
-        .then((response) => {
-          expect(response.status).toBe(httpStatus.OK);
-        });
-  });
-
-  test('test analytics user online', () => {
-    return request(app)
-        .get('/v1/analytics/users/online')
-        .then((response) => {
-          expect(response.status).toBe(httpStatus.OK);
-        });
-  });
-
   test('test update user profile without name', () => {
     return request(app)
         .put('/v1/auth/profile')
@@ -542,6 +522,28 @@ describe('GET /', () => {
           const responseBody: BaseResponse<ValidateUserResponse> = response.body;
           expect(response.status).toBe(httpStatus.OK);
           expect(responseBody.data?.name).toEqual('Reynanda Putra Pratama');
+        });
+  });
+
+  test('generate user\'s session', async () => {
+    await generateUserSession();
+  });
+
+  test('test analytics user list', () => {
+    return request(app)
+        .get('/v1/analytics/users')
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          expect(response.status).toBe(httpStatus.OK);
+        });
+  });
+
+  test('test analytics user online', () => {
+    return request(app)
+        .get('/v1/analytics/users/online')
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          expect(response.status).toBe(httpStatus.OK);
         });
   });
 });

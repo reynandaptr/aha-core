@@ -2,13 +2,19 @@ import {prisma} from '@reynandaptr/aha-types/dist';
 import moment from 'moment';
 
 export const createUserWithGoogleAccount = async () => {
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: 'reynandapp1997@yahoo.com',
       provider: 'GOOGLE',
       provider_id: '106210729166790193600',
       is_verified: true,
       name: '',
+    },
+  });
+  await prisma.session.create({
+    data: {
+      user_id: user.id,
+      type: 'SIGN_UP',
     },
   });
 };

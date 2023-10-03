@@ -1,30 +1,34 @@
-import {prisma} from '@reynandaptr/aha-types/dist';
+import {prisma, UserAnalyticsResponse} from '@reynandaptr/aha-types/dist';
 import {Request, Response} from 'express';
 
 import {handleResponseError, handleResponseSuccess} from '../../utils/response';
 
 export const UserList = async (req: Request, res: Response) => {
   try {
-    const result = await prisma.$queryRaw`
+    const result: UserAnalyticsResponse[] = await prisma.$queryRaw`
 SELECT
-  users.id AS user_id,
-  COUNT(sessions) FILTER (
-    WHERE
-      sessions.type = 'LOGIN'
-  ) AS login_count,
-  COUNT(sessions) FILTER (
-    WHERE
-      sessions.type = 'ONLINE'
-  ) AS online_count,
-  MAX(sessions.created_at) FILTER (
-    WHERE
-      sessions.type = 'ONLINE'
-  ) AS last_session
+    users.id,
+    users.email,
+    users.name,
+    users.provider,
+    users.is_verified,
+    COUNT(sessions) FILTER (
+        WHERE
+            sessions.type = 'LOGIN'
+    ) AS login_count,
+    MIN(sessions.created_at) FILTER (
+        WHERE
+            sessions.type = 'SIGN_UP'
+    ) AS signup_timestamp,
+    MAX(sessions.created_at) FILTER (
+        WHERE
+            sessions.type = 'ONLINE'
+    ) AS last_session_timestamp
 FROM
-  users
-  INNER JOIN sessions ON sessions.user_id = users.id
+    users
+    INNER JOIN sessions ON sessions.user_id = users.id
 GROUP BY
-  1
+    1, 2, 3, 4, 5
     `;
     return handleResponseSuccess(res, 200, result);
   } catch (error) {
