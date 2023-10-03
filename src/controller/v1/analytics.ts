@@ -1,4 +1,4 @@
-import {prisma, UserAnalyticsResponse} from '@reynandaptr/aha-types/dist';
+import {prisma, UserAnalyticsResponse, UserOnlineAnalyticsResponse} from '@reynandaptr/aha-types/dist';
 import {Request, Response} from 'express';
 
 import {handleResponseError, handleResponseSuccess} from '../../utils/response';
@@ -38,7 +38,16 @@ GROUP BY
 
 export const UserOnline = async (req: Request, res: Response) => {
   try {
-    const result = await prisma.$queryRaw`
+    const userCount = await prisma.user.count();
+    const _userActiveSessionCount: any[] = await prisma.$queryRaw`
+SELECT
+  COUNT(DISTINCT user_id) AS user_active_session_count
+FROM
+  sessions
+WHERE
+  TYPE = 'ONLINE'
+    `;
+    const _averageActiveUser: any[] = await prisma.$queryRaw`
 WITH users_session AS (
   SELECT
     user_id,
@@ -74,7 +83,13 @@ SELECT
 FROM
   active_users_last7days_rolling
     `;
-    return handleResponseSuccess(res, 200, result);
+    const userActiveSessionCount: number = _userActiveSessionCount.length > 0 ? _userActiveSessionCount[0].user_active_session_count : 0;
+    const averageActiveUser: UserOnlineAnalyticsResponse = _averageActiveUser.length > 0 ? _averageActiveUser[0].average_active_users : 0;
+    return handleResponseSuccess(res, 200, {
+      user_count: userCount,
+      user_active_session_count: userActiveSessionCount,
+      average_active_user: averageActiveUser,
+    });
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }
