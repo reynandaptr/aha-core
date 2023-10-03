@@ -2,7 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 
-import {EmailVerification, Login, LogOut, Oauth2RedirectGoogle, ResendEmailVerification, ResetPassword, SignUp, TestLoginGoogle, ValidateToken} from '../../controller/v1/auth';
+import {EmailVerification, Login, LogOut, Oauth2RedirectGoogle, ResendEmailVerification, ResetPassword, SignUp, TestLoginGoogle, UpdateUserProfile, ValidateToken} from '../../controller/v1/auth';
 import {validate} from '../../middlewares/auth';
 import {getEnvvarValue} from '../../utils/envvar';
 
@@ -15,6 +15,7 @@ router.post('/email-verification', validate(false, true), EmailVerification);
 router.post('/resend-email-verification', validate(false), ResendEmailVerification);
 router.post('/reset-password', validate(true), ResetPassword);
 router.post('/logout', validate(false), LogOut);
+router.put('/profile', validate(true), UpdateUserProfile);
 
 const {
   value: environment,

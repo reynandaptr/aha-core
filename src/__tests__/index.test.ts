@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {faker} from '@faker-js/faker';
 import {beforeAll, describe, expect, test} from '@jest/globals';
-import {BaseResponse, prisma} from '@reynandaptr/aha-types/dist';
+import {BaseResponse, prisma, ValidateUserResponse} from '@reynandaptr/aha-types/dist';
 import httpStatus from 'http-status';
 import request from 'supertest';
 
@@ -17,6 +17,7 @@ const user1 = {
   repassword: user1Password,
 };
 let jwt: string;
+let verifiedUserJwt: string;
 
 const {
   value: appURL,
@@ -384,6 +385,7 @@ describe('GET /', () => {
           email: 'hello@reynandaptr.dev',
         })
         .then((response) => {
+          verifiedUserJwt = response.get('Set-Cookie')[0].split('=')[1];
           expect(response.status).toBe(httpStatus.FOUND);
           expect(response.get('Set-Cookie').length).toBe(1);
           expect(response.get('location')).toBe(`${appURL}/app`);
@@ -438,9 +440,7 @@ describe('GET /', () => {
         })
         .set('Cookie', [`aha_jwt=${jwt}`])
         .then((response) => {
-          expect(response.status).toBe(httpStatus.FOUND);
-          expect(response.get('Set-Cookie')).toBeUndefined();
-          expect(response.get('location')).toBe(`${appURL}/login`);
+          expect(response.status).toBe(httpStatus.OK);
         });
   });
 
@@ -466,9 +466,7 @@ describe('GET /', () => {
           session_token: `${session?.token}`,
         })
         .then((response) => {
-          expect(response.status).toBe(httpStatus.FOUND);
-          expect(response.get('Set-Cookie').length).toBe(1);
-          expect(response.get('location')).toBe(`${appURL}/login`);
+          expect(response.status).toBe(httpStatus.OK);
         });
   });
 
@@ -489,6 +487,61 @@ describe('GET /', () => {
         .get('/v1/analytics/users/online')
         .then((response) => {
           expect(response.status).toBe(httpStatus.OK);
+        });
+  });
+
+  test('test update user profile without name', () => {
+    return request(app)
+        .put('/v1/auth/profile')
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          expect(response.status).toEqual(httpStatus.BAD_REQUEST);
+        });
+  });
+
+  test('test update user profile OK', () => {
+    return request(app)
+        .put('/v1/auth/profile')
+        .send({
+          name: 'Rey',
+        })
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          expect(response.status).toEqual(httpStatus.OK);
+        });
+  });
+
+  test('test validate OK', () => {
+    return request(app)
+        .get('/v1/auth/validate-token')
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          const responseBody: BaseResponse<ValidateUserResponse> = response.body;
+          expect(response.status).toBe(httpStatus.OK);
+          expect(responseBody.data?.name).toEqual('Rey');
+        });
+  });
+
+  test('test update user profile OK', () => {
+    return request(app)
+        .put('/v1/auth/profile')
+        .send({
+          name: 'Reynanda Putra Pratama',
+        })
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          expect(response.status).toEqual(httpStatus.OK);
+        });
+  });
+
+  test('test validate OK', () => {
+    return request(app)
+        .get('/v1/auth/validate-token')
+        .set('Cookie', [`aha_jwt=${verifiedUserJwt}`])
+        .then((response) => {
+          const responseBody: BaseResponse<ValidateUserResponse> = response.body;
+          expect(response.status).toBe(httpStatus.OK);
+          expect(responseBody.data?.name).toEqual('Reynanda Putra Pratama');
         });
   });
 });

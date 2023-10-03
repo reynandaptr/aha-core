@@ -1,6 +1,6 @@
 import {faker} from '@faker-js/faker';
 import {prisma} from '@reynandaptr/aha-types/dist';
-import {EmailVerificationRequestSchema, LoginRequestSchema, Oauth2RedirectRequest, ResetPasswordRequestSchema, SignUpRequestSchema, ValidateUserResponse} from '@reynandaptr/aha-types/dist/types';
+import {EmailVerificationRequestSchema, LoginRequestSchema, Oauth2RedirectRequest, ResetPasswordRequestSchema, SignUpRequestSchema, UpdateUserProfileRequestSchema, ValidateUserResponse} from '@reynandaptr/aha-types/dist/types';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import {Request, Response} from 'express';
@@ -243,3 +243,21 @@ export const Oauth2RedirectGoogle = async (req: Request, res: Response) => {
   }
 };
 /* c8 ignore stop */
+
+export const UpdateUserProfile = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return handleResponseError(res, null, null, true);
+    const {body} = await validateRequest(UpdateUserProfileRequestSchema, req);
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        name: body.name,
+      },
+    });
+    return handleResponseSuccess(res, httpStatus.OK, user);
+  } catch (error) {
+    return handleResponseError(res, error, null, false);
+  }
+};
