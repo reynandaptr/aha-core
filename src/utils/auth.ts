@@ -37,7 +37,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
         if (error) return handleLoginError(res, error, null, true, loginProvider);
         if (!match) return handleLoginError(res, error, 'Password is wrong', true, loginProvider);
         await setCookie(res, user, loginProvider);
-        return handleLoginSuccess(req, res);
+        return handleLoginSuccess(usage, req, res);
       });
     } else {
       user = await prisma.user.update({
@@ -51,7 +51,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
         },
       });
       await setCookie(res, user, loginProvider);
-      return handleLoginSuccess(req, res);
+      return handleLoginSuccess(usage, req, res);
     }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -88,7 +88,7 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
           });
           await setCookie(res, user, loginProvider);
           await sendEmailVerification(user);
-          return handleLoginSuccess(req, res);
+          return handleLoginSuccess(usage, req, res);
         } catch (error) {
           return handleLoginError(res, error, null, true, loginProvider);
         }
@@ -101,8 +101,11 @@ export const createOrGetUser = async (usage: 'login' | 'sign-up', req: Request, 
   }
 };
 
-const handleLoginSuccess = (req: Request, res: Response) => {
+const handleLoginSuccess = (usage: 'login' | 'sign-up', req: Request, res: Response) => {
   if (req.headers.accept === 'application/json') {
+    if (usage === 'sign-up') {
+      return handleResponseSuccess(res, httpStatus.CREATED);
+    }
     return handleResponseSuccess(res, httpStatus.OK);
   }
   const {

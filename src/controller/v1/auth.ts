@@ -165,17 +165,7 @@ export const LogOut = async (req: Request, res: Response) => {
       domain: cookieDomain,
     });
 
-    if (req.headers.accept === 'application/json') {
-      return handleResponseSuccess(res, httpStatus.OK);
-    }
-    const {
-      value: appURL,
-    } = getEnvvarValue('APP_URL', true, (error) => {
-      if (error) {
-        throw new Error(error);
-      }
-    });
-    return res.redirect(`${appURL}`);
+    return handleResponseSuccess(res, httpStatus.OK);
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }
@@ -248,7 +238,7 @@ export const UpdateUserProfile = async (req: Request, res: Response) => {
   try {
     if (!req.user) return handleResponseError(res, null, null, true);
     const {body} = await validateRequest(UpdateUserProfileRequestSchema, req);
-    const user = await prisma.user.update({
+    await prisma.user.update({
       where: {
         id: req.user.id,
       },
@@ -256,7 +246,7 @@ export const UpdateUserProfile = async (req: Request, res: Response) => {
         name: body.name,
       },
     });
-    return handleResponseSuccess(res, httpStatus.OK, user);
+    return handleResponseSuccess(res, httpStatus.OK);
   } catch (error) {
     return handleResponseError(res, error, null, false);
   }

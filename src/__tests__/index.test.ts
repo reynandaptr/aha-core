@@ -162,7 +162,7 @@ describe('GET /', () => {
         .send(user1)
         .set('Accept', 'application/json')
         .then((response) => {
-          expect(response.status).toBe(httpStatus.OK);
+          expect(response.status).toBe(httpStatus.CREATED);
           expect(response.get('Set-Cookie').length).toBe(1);
         });
   });
