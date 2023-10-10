@@ -1,5 +1,7 @@
+import {Prisma} from '@prisma/client';
 import {prisma, UserAnalyticsResponse, UserOnlineAnalyticsResponse} from '@reynandaptr/aha-types/dist';
 import {Request, Response} from 'express';
+import moment from 'moment';
 
 import {handleResponseError, handleResponseSuccess} from '../../utils/response';
 
@@ -39,14 +41,15 @@ GROUP BY
 export const UserOnline = async (req: Request, res: Response) => {
   try {
     const userCount = await prisma.user.count();
-    const _userActiveSessionCount: any[] = await prisma.$queryRaw`
+    const date: string = moment().format('YYYY-MM-DD');
+    const _userActiveSessionCount: any[] = await prisma.$queryRaw(Prisma.sql`
 SELECT
   COUNT(DISTINCT user_id) AS user_active_session_count
 FROM
   sessions
 WHERE
-  TYPE = 'ONLINE'
-    `;
+  type = 'ONLINE' AND CAST(DATE(created_at) AS TEXT) = ${date}
+`);
     const _averageActiveUser: any[] = await prisma.$queryRaw`
 WITH users_session AS (
   SELECT
@@ -56,7 +59,7 @@ WITH users_session AS (
     sessions
   WHERE
     created_at >= CURRENT_DATE - INTERVAL '7 days'
-    AND TYPE = 'ONLINE'
+    AND type = 'ONLINE'
   GROUP BY
     user_id,
     session_date
